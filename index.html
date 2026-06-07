@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>河北师范大学课程共享计划</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #999;
+            --border: #e5e5e5;
+            --hover-bg: #f6f6f6;
+            --active-bg: #eee;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem 3rem;
+        }
+
+        header { margin-bottom: 3.5rem; }
+
+        h1 {
+            font-size: 1.55rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            color: #111;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
+
+        .repo-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .repo-link:hover { color: var(--text); text-decoration: underline; }
+
+        hr { border: none; border-top: 1px solid var(--border); margin: 2.2rem 0; }
+
+        section { margin-bottom: 2.8rem; }
+
+        h2 {
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        p { color: #3a3a3a; margin-bottom: 0.7rem; font-size: 0.93rem; }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--text); text-decoration: underline; }
+        .breadcrumb .sep { color: #ccc; user-select: none; }
+        .breadcrumb .current { color: var(--text); font-weight: 500; }
+
+        /* File list */
+        .file-browser { list-style: none; padding: 0; margin: 0; }
+        .file-browser li { border-bottom: 1px solid #f2f2f2; }
+
+        .file-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 0.35rem;
+            transition: background 0.1s ease;
+        }
+        .file-row:hover { background: var(--hover-bg); }
+
+        .file-row .icon {
+            flex-shrink: 0;
+            width: 1.2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .file-row .icon.folder { color: #555; }
+
+        .file-row .name-btn {
+            flex: 1;
+            min-width: 0;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.92rem;
+            color: var(--text);
+            cursor: pointer;
+            text-align: left;
+            padding: 0.15rem 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.12s ease;
+        }
+        .file-row .name-btn:hover { color: #000; text-decoration: underline; }
+
+        .file-row .meta {
+            flex-shrink: 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .file-row .btn-dl {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid #ccc;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .file-row .btn-dl:hover {
+            border-color: #333;
+            color: #000;
+            background: #f9f9f9;
+        }
+
+        /* Loading & Error */
+        .loading, .error-msg, .empty-msg {
+            text-align: center;
+            padding: 2.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .error-msg { color: #c44; }
+        .loading .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 1.5px solid #ddd;
+            border-top-color: #666;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* General button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.55rem 1.15rem;
+            border: 1px solid #333;
+            color: #222;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 450;
+            letter-spacing: 0.02em;
+            transition: all 0.18s ease;
+            background: none;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+        .btn .arrow { display: inline-block; transition: transform 0.15s ease; }
+        .btn:hover .arrow { transform: translateX(2px); }
+
+        /* --- Preview Overlay --- */
+        .preview-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-overlay.open { display: flex; }
+
+        .preview-panel {
+            background: #fff;
+            width: 90vw;
+            max-width: 820px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            animation: previewIn 0.18s ease;
+        }
+        @keyframes previewIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .preview-header .preview-title {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .preview-header .btn-dl-header {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.35rem 0.75rem;
+            border: 1px solid #ccc;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .preview-header .btn-dl-header:hover {
+            border-color: #333;
+            color: #000;
+            background: #f9f9f9;
+        }
+        .preview-header .btn-close {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.12s ease;
+        }
+        .preview-header .btn-close:hover { color: #000; }
+
+        .preview-body {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+            min-height: 120px;
+        }
+
+        /* Preview content types */
+        .preview-text {
+            padding: 1.25rem;
+            font-family: "SF Mono", "Fira Code", "Consolas", "Monaco", monospace;
+            font-size: 0.82rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #2a2a2a;
+            margin: 0;
+            background: #fafafa;
+            min-height: 200px;
+        }
+        .preview-img-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: #fafafa;
+            min-height: 200px;
+        }
+        .preview-img-wrap img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+        }
+        .preview-unsupported {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.8;
+        }
+        .preview-body .loading {
+            padding: 3rem 0;
+        }
+
+        /* Readme section */
+        .readme-section {
+            margin-top: 2rem;
+        }
+        .readme-content {
+            font-size: 0.93rem;
+            color: #3a3a3a;
+            line-height: 1.85;
+        }
+        .readme-content h1 { font-size: 1.35rem; font-weight: 600; margin: 1.8rem 0 0.8rem; color: #111; text-transform: none; letter-spacing: -0.01em; }
+        .readme-content h2 { font-size: 1.1rem; font-weight: 600; margin: 1.6rem 0 0.6rem; color: #222; text-transform: none; letter-spacing: -0.01em; }
+        .readme-content h3 { font-size: 1rem; font-weight: 600; margin: 1.4rem 0 0.5rem; color: #333; text-transform: none; letter-spacing: 0; }
+        .readme-content h4, .readme-content h5, .readme-content h6 { font-size: 0.93rem; font-weight: 600; margin: 1.2rem 0 0.4rem; color: #3a3a3a; text-transform: none; letter-spacing: 0; }
+        .readme-content p { margin-bottom: 0.85rem; }
+        .readme-content ul, .readme-content ol { padding-left: 1.5rem; margin-bottom: 0.85rem; }
+        .readme-content li { margin-bottom: 0.3rem; }
+        .readme-content code {
+            font-family: "SF Mono", "Fira Code", "Consolas", "Monaco", monospace;
+            font-size: 0.84em;
+            background: #f3f3f3;
+            padding: 0.15em 0.4em;
+            border-radius: 2px;
+            color: #333;
+        }
+        .readme-content pre {
+            background: #f6f6f6;
+            padding: 1rem 1.2rem;
+            overflow-x: auto;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            border: 1px solid #eaeaea;
+        }
+        .readme-content pre code {
+            background: none;
+            padding: 0;
+            font-size: inherit;
+        }
+        .readme-content blockquote {
+            border-left: 3px solid #d0d0d0;
+            padding: 0.3rem 0 0.3rem 1rem;
+            margin: 0.85rem 0;
+            color: var(--text-secondary);
+        }
+        .readme-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1rem;
+            font-size: 0.88rem;
+        }
+        .readme-content th, .readme-content td {
+            border: 1px solid #e0e0e0;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .readme-content th { background: #f6f6f6; font-weight: 600; }
+        .readme-content a { color: var(--text); text-decoration: underline; }
+        .readme-content a:hover { color: #000; }
+        .readme-content hr { margin: 1.8rem 0; }
+        .readme-content img { max-width: 100%; }
+
+        /* Disclaimer */
+        .disclaimer {
+            margin-top: 2.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.9;
+        }
+        .disclaimer p { color: var(--text-muted); font-size: 0.8rem; }
+        .disclaimer h2 { margin-bottom: 0.5rem; }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.8rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+        footer a { color: var(--text-muted); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        footer p + p { margin-top: 0.25rem; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 2.5rem 1.25rem 2rem; }
+            h1 { font-size: 1.35rem; }
+            .file-row .name-btn { font-size: 0.88rem; }
+            .file-row .meta { font-size: 0.7rem; }
+            .preview-panel { width: 96vw; max-height: 92vh; }
+            .preview-iframe { height: 55vh; }
+            .preview-text { font-size: 0.76rem; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>河北师范大学课程共享计划</h1>
+            <p class="subtitle">HBNU Course Sharing</p>
+            <a href="https://github.com/Mukanaan/HBNU-CourseSharing" class="repo-link" target="_blank" rel="noopener">
+                github.com/Mukanaan/HBNU-CourseSharing
+            </a>
+        </header>
+
+        <main>
+            <section id="about">
+                <h2>关于本站</h2>
+                <p>本项目凝聚校内优质的课程资源，涵盖课件、笔记、历年试题及学习指南，致力于为同学们提供开放、高效的学习参考。所有资料均由同学自愿上传分享，仅供个人学习交流使用。</p>
+            </section>
+
+            <hr>
+
+            <section id="browser-section">
+                <h2>浏览资料</h2>
+                <div class="breadcrumb" id="breadcrumb"></div>
+                <div id="file-list-container">
+                    <div class="loading"><span class="spinner"></span>加载中...</div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <a href="https://github.com/Mukanaan/HBNU-CourseSharing" class="btn" target="_blank" rel="noopener">
+                        在 GitHub 上查看 <span class="arrow">&rarr;</span>
+                    </a>
+                </div>
+            </section>
+
+            <hr>
+
+            <section id="readme-section" class="readme-section" style="display:none;">
+                <h2>README</h2>
+                <div class="readme-content" id="readmeContent">
+                    <div class="loading"><span class="spinner"></span>加载中...</div>
+                </div>
+            </section>
+
+            <section class="disclaimer">
+                <h2>免责声明</h2>
+                <p>本仓库资料仅供学习参考，不保证完全准确或为最新版本。上传者需确保分享内容不侵犯教师或学校的知识产权。如发现侵权内容，请联系维护者，我们将立即下架处理。</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 协议共享</p>
+            <p>Made by HBNU Students</p>
+        </footer>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-overlay" id="previewOverlay">
+        <div class="preview-panel">
+            <div class="preview-header">
+                <span class="preview-title" id="previewTitle"></span>
+                <a class="btn-dl-header" id="previewDlBtn" href="#" download>下载</a>
+                <button class="btn-close" id="previewClose" title="关闭">&times;</button>
+            </div>
+            <div class="preview-body" id="previewBody"></div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const REPO_OWNER = 'Mukanaan';
+            const REPO_NAME = 'HBNU-CourseSharing';
+            const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents`;
+            const RAW_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main`;
+
+            const breadcrumbEl = document.getElementById('breadcrumb');
+            const containerEl = document.getElementById('file-list-container');
+            const overlay    = document.getElementById('previewOverlay');
+            const previewTitle   = document.getElementById('previewTitle');
+            const previewBody    = document.getElementById('previewBody');
+            const previewDlBtn   = document.getElementById('previewDlBtn');
+            const previewCloseBtn = document.getElementById('previewClose');
+
+            let pathStack = [];
+
+            function currentPath() { return pathStack.join('/'); }
+
+            function formatSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const units = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(1024));
+                const size = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1);
+                return size + ' ' + units[i];
+            }
+
+            function getExt(name) {
+                return (name.split('.').pop() || '').toLowerCase();
+            }
+
+            function getFileIcon(name) {
+                const ext = getExt(name);
+                const docExts  = ['pdf','doc','docx','ppt','pptx','xls','xlsx','txt','md'];
+                const imgExts  = ['jpg','jpeg','png','gif','svg','webp','bmp'];
+                const codeExts = ['py','js','ts','java','c','cpp','h','hpp','cs','go','rs','html','css','json','xml','yaml','yml','sh','bat','sql'];
+                if (docExts.includes(ext)) return '=';
+                if (imgExts.includes(ext)) return '#';
+                if (codeExts.includes(ext)) return '{ }';
+                if (['zip','rar','7z','tar','gz'].includes(ext)) return '+';
+                return '~';
+            }
+
+            /* ------ Preview helpers ------ */
+            const TEXT_EXTS = new Set([
+                'txt','md','py','js','ts','java','c','cpp','h','hpp','cs','go','rs',
+                'html','css','json','xml','yaml','yml','sh','bat','sql','r','rb','php',
+                'swift','kt','scala','lua','pl','tex','cfg','ini','log','csv','tsv','toml'
+            ]);
+            const IMG_EXTS  = new Set(['jpg','jpeg','png','gif','svg','webp','bmp']);
+            const PDF_EXTS  = new Set(['pdf']);
+
+            function isTextFile(name)  { return TEXT_EXTS.has(getExt(name)); }
+            function isImageFile(name) { return IMG_EXTS.has(getExt(name)); }
+            function isPdfFile(name)   { return PDF_EXTS.has(getExt(name)); }
+
+            function openPreview(name, downloadUrl) {
+                previewTitle.textContent = name;
+                previewDlBtn.href = downloadUrl;
+                previewDlBtn.setAttribute('download', name);
+                previewBody.innerHTML = '<div class="loading"><span class="spinner"></span>加载中...</div>';
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+
+                if (isTextFile(name)) {
+                    loadTextPreview(downloadUrl);
+                } else if (isImageFile(name)) {
+                    loadImagePreview(downloadUrl);
+                } else if (isPdfFile(name)) {
+                    loadPdfPreview(downloadUrl);
+                } else {
+                    loadUnsupportedPreview(name, downloadUrl);
+                }
+            }
+
+            async function loadTextPreview(url) {
+                try {
+                    const resp = await fetch(url);
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    const text = await resp.text();
+                    previewBody.innerHTML = `<pre class="preview-text">${escapeHtml(text)}</pre>`;
+                } catch (err) {
+                    previewBody.innerHTML = `<div class="preview-unsupported">无法加载文件内容<br><small>(${escapeHtml(err.message)})</small></div>`;
+                }
+            }
+
+            function loadImagePreview(url) {
+                previewBody.innerHTML = `<div class="preview-img-wrap"><img src="${escapeHtml(url)}" alt="preview" onerror="this.parentElement.innerHTML='<div class=\\'preview-unsupported\\'>图片加载失败</div>'"></div>`;
+            }
+
+            function loadPdfPreview(url) {
+                previewBody.innerHTML = `<iframe class="preview-iframe" src="${escapeHtml(url)}" onerror="this.parentElement.innerHTML='<div class=\\'preview-unsupported\\'>PDF 加载失败，请下载后查看</div>'"></iframe>`;
+            }
+
+            function loadUnsupportedPreview(name, downloadUrl) {
+                const ext = getExt(name).toUpperCase();
+                previewBody.innerHTML = `<div class="preview-unsupported">暂不支持在线预览 ${ext} 格式<br><br><a class="btn-dl-header" href="${escapeHtml(downloadUrl)}" download="${escapeHtml(name)}">点击下载文件</a></div>`;
+            }
+
+            function closePreview() {
+                overlay.classList.remove('open');
+                previewBody.innerHTML = '';
+                document.body.style.overflow = '';
+            }
+
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closePreview();
+            });
+            previewCloseBtn.addEventListener('click', closePreview);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && overlay.classList.contains('open')) closePreview();
+            });
+
+            /* ------ Breadcrumb ------ */
+            function renderBreadcrumb() {
+                let html = '<a href="#" data-index="-1">HBNU-CourseSharing</a>';
+                for (let i = 0; i < pathStack.length; i++) {
+                    html += ' <span class="sep">/</span> ';
+                    if (i === pathStack.length - 1) {
+                        html += `<span class="current">${escapeHtml(pathStack[i])}</span>`;
+                    } else {
+                        html += `<a href="#" data-index="${i}">${escapeHtml(pathStack[i])}</a>`;
+                    }
+                }
+                breadcrumbEl.innerHTML = html;
+            }
+
+            /* ------ File list rendering ------ */
+            function renderFileList(items) {
+                if (!items || items.length === 0) {
+                    containerEl.innerHTML = '<div class="empty-msg">此目录为空</div>';
+                    return;
+                }
+
+                const dirs  = items.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name));
+                const files = items.filter(i => i.type === 'file').sort((a,b) => a.name.localeCompare(b.name));
+                const sorted = [...dirs, ...files];
+
+                let html = '<ul class="file-browser">';
+                for (const item of sorted) {
+                    const isDir = item.type === 'dir';
+                    const name  = escapeHtml(item.name);
+                    const dlUrl = escapeHtml(item.download_url || '');
+
+                    html += '<li><div class="file-row">';
+
+                    // icon
+                    if (isDir) {
+                        html += `<span class="icon folder">/</span>`;
+                    } else {
+                        html += `<span class="icon">${getFileIcon(item.name)}</span>`;
+                    }
+
+                    // name button
+                    if (isDir) {
+                        html += `<button class="name-btn" data-action="enter" data-name="${name}">${name}</button>`;
+                    } else {
+                        html += `<button class="name-btn" data-action="preview" data-name="${name}" data-url="${dlUrl}">${name}</button>`;
+                    }
+
+                    // meta
+                    html += `<span class="meta">${isDir ? '' : formatSize(item.size)}</span>`;
+
+                    // download button (files only)
+                    if (!isDir) {
+                        html += `<a class="btn-dl" href="${dlUrl}" download="${name}" title="下载">&#8595;</a>`;
+                    } else {
+                        html += `<span style="width:2rem;flex-shrink:0;"></span>`;
+                    }
+
+                    html += '</div></li>';
+                }
+                html += '</ul>';
+                containerEl.innerHTML = html;
+            }
+
+            /* ------ API & state ------ */
+            function showError(msg) {
+                containerEl.innerHTML = `<div class="error-msg">${escapeHtml(msg)}</div>`;
+            }
+            function showLoading() {
+                containerEl.innerHTML = '<div class="loading"><span class="spinner"></span>加载中...</div>';
+            }
+
+            async function fetchContents(path) {
+                const url = path ? `${API_BASE}/${path}` : API_BASE;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 404) throw new Error('目录不存在或为空');
+                    if (response.status === 403) throw new Error('API 请求次数已达上限，请稍后再试');
+                    throw new Error('加载失败 (HTTP ' + response.status + ')');
+                }
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('此路径指向一个文件，而非目录');
+                return data;
+            }
+
+            async function loadDirectory() {
+                showLoading();
+                renderBreadcrumb();
+                try {
+                    const items = await fetchContents(currentPath());
+                    renderFileList(items);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+
+            function navigateTo(index) {
+                if (index === -1) { pathStack = []; }
+                else { pathStack = pathStack.slice(0, index + 1); }
+                loadDirectory();
+            }
+
+            function enterDirectory(name) {
+                pathStack.push(name);
+                loadDirectory();
+            }
+
+            /* ------ Event delegation ------ */
+            breadcrumbEl.addEventListener('click', function (e) {
+                e.preventDefault();
+                const link = e.target.closest('a');
+                if (!link) return;
+                navigateTo(parseInt(link.getAttribute('data-index'), 10));
+            });
+
+            containerEl.addEventListener('click', function (e) {
+                // Enter directory
+                const enterBtn = e.target.closest('[data-action="enter"]');
+                if (enterBtn) {
+                    e.preventDefault();
+                    enterDirectory(enterBtn.getAttribute('data-name'));
+                    return;
+                }
+                // Preview file
+                const previewBtn = e.target.closest('[data-action="preview"]');
+                if (previewBtn) {
+                    e.preventDefault();
+                    openPreview(previewBtn.getAttribute('data-name'), previewBtn.getAttribute('data-url'));
+                    return;
+                }
+            });
+
+            function escapeHtml(str) {
+                const map = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
+                return String(str).replace(/[&<>"']/g, c => map[c]);
+            }
+
+            // Initial load
+            loadDirectory();
+            loadReadme();
+
+            /* ------ README rendering ------ */
+            async function loadReadme() {
+                const section = document.getElementById('readme-section');
+                const content = document.getElementById('readmeContent');
+                try {
+                    const resp = await fetch(`${RAW_BASE}/README.md`);
+                    if (!resp.ok) throw new Error('未找到 README.md');
+                    const mdText = await resp.text();
+                    if (typeof marked !== 'undefined') {
+                        content.innerHTML = marked.parse(mdText);
+                    } else {
+                        // Fallback: show as plain text
+                        content.innerHTML = `<pre class="preview-text">${escapeHtml(mdText)}</pre>`;
+                    }
+                    section.style.display = '';
+                } catch (err) {
+                    // README not found, hide the section
+                    section.style.display = 'none';
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
