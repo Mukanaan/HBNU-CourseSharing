@@ -69,6 +69,34 @@
 
         p { color: #3a3a3a; margin-bottom: 0.7rem; font-size: 0.93rem; }
 
+        /* Nav buttons */
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.35rem 0.8rem;
+            border: 1px solid #ccc;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .nav-btn:hover {
+            border-color: #333;
+            color: #000;
+            background: #f9f9f9;
+        }
+        .nav-btn:active {
+            background: var(--active-bg);
+        }
+
         /* Breadcrumb */
         .breadcrumb {
             display: flex;
@@ -443,6 +471,10 @@
 
             <section id="browser-section">
                 <h2>浏览资料</h2>
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="btn-root" title="返回根目录">&#8962; 根目录</button>
+                    <button class="nav-btn" id="btn-up" title="返回上一级目录">&larr; 上一级</button>
+                </div>
                 <div class="breadcrumb" id="breadcrumb"></div>
                 <div id="file-list-container">
                     <div class="loading"><span class="spinner"></span>加载中...</div>
@@ -705,6 +737,21 @@
                 pathStack.push(name);
                 loadDirectory();
             }
+
+            /* ------ Nav buttons ------ */
+            document.getElementById('btn-root').addEventListener('click', function () {
+                if (pathStack.length > 0) {
+                    pathStack = [];
+                    loadDirectory();
+                }
+            });
+
+            document.getElementById('btn-up').addEventListener('click', function () {
+                if (pathStack.length > 0) {
+                    pathStack.pop();
+                    loadDirectory();
+                }
+            });
 
             /* ------ Event delegation ------ */
             breadcrumbEl.addEventListener('click', function (e) {
