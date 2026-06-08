@@ -647,14 +647,19 @@
             }
 
             /* ------ File list rendering ------ */
+            const EXCLUDED_FILES = new Set(['.gitignore', 'LICENSE', '.nojekyll', 'index.html']);
+
             function renderFileList(items) {
-                if (!items || items.length === 0) {
+                // 过滤掉指定的文件
+                const filtered = (items || []).filter(i => i.type !== 'file' || !EXCLUDED_FILES.has(i.name));
+
+                if (!filtered || filtered.length === 0) {
                     containerEl.innerHTML = '<div class="empty-msg">此目录为空</div>';
                     return;
                 }
 
-                const dirs  = items.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name));
-                const files = items.filter(i => i.type === 'file').sort((a,b) => a.name.localeCompare(b.name));
+                const dirs  = filtered.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name));
+                const files = filtered.filter(i => i.type === 'file').sort((a,b) => a.name.localeCompare(b.name));
                 const sorted = [...dirs, ...files];
 
                 let html = '<ul class="file-browser">';
