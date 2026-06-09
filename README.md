@@ -1,33 +1,21 @@
 <div align="center">
   <img src="./header.png" alt="HBNU-CourseSharing" width="100%" />
   <h3>河北师范大学课程共享计划</h3>
-  
+
   <p>
     <a href="https://mukanaan.github.io/HBNU-CourseSharing/" target="_blank" rel="noopener noreferrer">
       <img src="https://img.shields.io/static/v1?label=HBNU&message=CourseSharing&color=gray&labelColor=1e40af&style=flat&logo=GitHub&logoColor=white" alt="GitHub Pages" />
     </a>
   </p>
-  
-  <p>
-    <img style="display: inline-block;" src="https://img.shields.io/github/watchers/Mukanaan/HBNU-CourseSharing" alt="GitHub watchers" />
-    <a href="https://github.com/Mukanaan/HBNU-CourseSharing/stargazers">
-      <img style="display: inline-block;" src="https://img.shields.io/github/stars/Mukanaan/HBNU-CourseSharing" alt="GitHub stars" />
-    </a>
-    <a href="https://github.com/Mukanaan/HBNU-CourseSharing/network">
-      <img style="display: inline-block;" src="https://img.shields.io/github/forks/Mukanaan/HBNU-CourseSharing" alt="GitHub forks" />
-    </a>
-    <a href="https://github.com/Mukanaan/HBNU-CourseSharing/issues">
-      <img style="display: inline-block;" src="https://img.shields.io/github/issues/Mukanaan/HBNU-CourseSharing" alt="GitHub issues" />
-    </a>
-    <a href="https://github.com/Mukanaan/HBNU-CourseSharing/pulls">
-      <img style="display: inline-block;" src="https://img.shields.io/github/issues-pr-closed-raw/Mukanaan/HBNU-CourseSharing" alt="GitHub closed pull requests" />
-    </a>
-    <img style="display: inline-block;" src="https://img.shields.io/github/contributors/Mukanaan/HBNU-CourseSharing" alt="GitHub contributors" />
-    <a href="https://github.com/Mukanaan/HBNU-CourseSharing/blob/main/LICENSE">
-      <img style="display: inline-block;" src="https://img.shields.io/github/license/Mukanaan/HBNU-CourseSharing" alt="GitHub license" />
-    </a>
-    <img style="display: inline-block;" src="https://img.shields.io/github/repo-size/Mukanaan/HBNU-CourseSharing" alt="GitHub repo size" />
-  </p>
+<img style="display: inline-block;" src="https://img.shields.io/github/watchers/Mukanaan/HBNU-CourseSharing" alt="GitHub watchers" />
+<a href="https://github.com/Mukanaan/HBNU-CourseSharing/stargazers"><img style="display: inline-block;" src="https://img.shields.io/github/stars/Mukanaan/HBNU-CourseSharing" alt="GitHub stars" /></a>
+<a href="https://github.com/Mukanaan/HBNU-CourseSharing/network"><img style="display: inline-block;" src="https://img.shields.io/github/forks/Mukanaan/HBNU-CourseSharing" alt="GitHub forks" /></a>
+<a href="https://github.com/Mukanaan/HBNU-CourseSharing/issues"><img style="display: inline-block;" src="https://img.shields.io/github/issues/Mukanaan/HBNU-CourseSharing" alt="GitHub issues" /></a>
+<a href="https://github.com/Mukanaan/HBNU-CourseSharing/pulls"><img style="display: inline-block;" src="https://img.shields.io/github/issues-pr-closed-raw/Mukanaan/HBNU-CourseSharing" alt="GitHub closed pull requests" /></a>
+<img style="display: inline-block;" src="https://img.shields.io/github/contributors/Mukanaan/HBNU-CourseSharing" alt="GitHub contributors" />
+<a href="https://github.com/Mukanaan/HBNU-CourseSharing/blob/main/LICENSE"><img style="display: inline-block;" src="https://img.shields.io/github/license/Mukanaan/HBNU-CourseSharing" alt="GitHub license" /></a>
+<img style="display: inline-block;" src="https://img.shields.io/github/repo-size/Mukanaan/HBNU-CourseSharing" alt="GitHub repo size" />
+
 </div>
 
 
